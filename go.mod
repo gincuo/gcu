@@ -1,3 +1,3 @@
-module github.com/storezhang/gex
+module github.com/gincuo/gcu
 
 go 1.17
