@@ -1,0 +1,64 @@
+kind: pipeline
+type: docker
+name: Web框架
+
+
+clone:
+  disable: true
+
+
+trigger:
+  event:
+    exclude:
+      - pull_request
+
+
+steps:
+  - name: 拉代码
+    image: dronestock/git
+    pull: always
+
+  - name: 编译
+    image: pangum/drone
+    pull: always
+    when:
+      branch:
+        - master
+        - develop
+    volumes:
+      - name: go
+        path: /go
+    settings:
+      test: false
+      compress: false
+
+  - name: 文档
+    image: dronestock/node
+    pull: always
+    when:
+      branch:
+        - doc
+        - doc/*
+    settings:
+      folder: doc
+
+  - name: 部署
+    image: dronestock/cos
+    pull: always
+    when:
+      branch:
+        - doc
+        - doc/*
+    settings:
+      folder: doc/dist
+      secret_id:
+        from_secret: secret_id_cos
+      secret_key:
+        from_secret: secret_key_cos
+      base_url: https://gex-1253228583.cos.ap-chengdu.myqcloud.com
+
+
+volumes:
+  - name: go
+    host:
+      path: /var/lib/cache/go
